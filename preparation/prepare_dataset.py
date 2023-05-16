@@ -15,23 +15,24 @@ def prepare_dataset():
     df['Days'] = (df['Deadline'] - df['Launched']).dt.days
     df = df.drop(columns=['Launched', 'Deadline'])
 
-    # et dummy variables
+    # get dummy variables
+
     cats = pd.get_dummies(df.Category, prefix='Category')
     for cat in cats.columns:
         cats[cat] = cats[cat].map(lambda x: 1 if x == True else 0)
 
-    conts = pd.get_dummies(df.Country, prefix='Country')
-    for cont in conts.columns:
-        conts[cont] = conts[cont].map(lambda x: 1 if x == True else 0)
-
-    subs = pd.get_dummies(df.Subcategory, prefix='Subcategory')
-    for sub in subs.columns:
-        subs[sub] = subs[sub].map(lambda x: 1 if x == True else 0)
+    # conts = pd.get_dummies(df.Country, prefix='Country')
+    # for cont in conts.columns:
+    #     conts[cont] = conts[cont].map(lambda x: 1 if x == True else 0)
+    #
+    # subs = pd.get_dummies(df.Subcategory, prefix='Subcategory')
+    # for sub in subs.columns:
+    #     subs[sub] = subs[sub].map(lambda x: 1 if x == True else 0)
 
     df = df.drop(columns=['Category', 'Country', 'Subcategory'])
     df = df.join(cats)
-    df = df.join(conts)
-    df = df.join(subs)
+    # df = df.join(conts)
+    # df = df.join(subs)
 
     # save prepared dataset
     df.to_csv("dataset.csv", index=False)
@@ -40,7 +41,7 @@ def test_model():
     from sklearn.preprocessing import StandardScaler
     from sklearn.model_selection import train_test_split
 
-    prepare_dataset()
+    # prepare_dataset()
     df = pd.read_csv("dataset.csv")
 
     print("preparing...")
@@ -84,5 +85,5 @@ def test_model():
 
 if __name__ == '__main__':
     prepare_dataset()
-    # test_model()
+    test_model()
 
