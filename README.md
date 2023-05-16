@@ -6,7 +6,7 @@ Kickstarter to popularna platforma crowdfundingowa, która pomogła tysiącom pr
 
 W tym zbiorze danych zebrane zostały informacje na temat dużej liczby projektów Kickstartera i tego, czy ostatecznie udało im się osiągnąć zamierzone cele finansowe. Zestaw danych obejmuje szeroki zakres typów projektów, w tym startupy technologiczne, twórcze projekty artystyczne i inicjatywy o wpływie społecznym.
 
-Zbiór danych składa się z następujących kolumn:
+Zbiór danych ma rozmiar 49,2 MB, jest w formacie `.csv`, składa się z 374853 wierszy oraz następujących kolumn:
 
 | Nazwa Kolumny | Opis |
 | --- | --- |
