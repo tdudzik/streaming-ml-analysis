@@ -1,4 +1,37 @@
-version: "3"
+version: '3.8'
 services:
-  train:
-    build: ./train_model
+  dataset-api:
+    build: ./dataset-api
+    ports:
+      - "8081:80"
+    volumes:
+      - data_volume:/app/data
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+  metrics-api:
+    build: ./metrics-api
+    ports:
+      - "8082:80"
+  training-api:
+    build: ./training-api
+    ports:
+      - "8083:80"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379
+  training-worker:
+    build: ./training-worker
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - METRICS_API_URL=http://metrics-api:80
+      - TRAINING_API_URL=http://training-api:80
+    volumes:
+      - data_volume:/app/data
+volumes:
+  data_volume:
+  model_volume:

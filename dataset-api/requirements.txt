@@ -1,0 +1,8 @@
+databases
+fastapi
+pyhumps
+python-multipart
+uvicorn
+pydantic
+sqlalchemy
+sqlalchemy-utils

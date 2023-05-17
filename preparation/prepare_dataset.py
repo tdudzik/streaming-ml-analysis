@@ -1,4 +1,6 @@
 import pandas as pd
+
+
 def prepare_dataset():
     pd.options.display.max_columns = 100
     df = pd.read_csv("kickstarter_projects.csv")
@@ -37,6 +39,7 @@ def prepare_dataset():
     # save prepared dataset
     df.to_csv("dataset.csv", index=False)
 
+
 def test_model():
     from sklearn.preprocessing import StandardScaler
     from sklearn.model_selection import train_test_split
@@ -46,7 +49,8 @@ def test_model():
 
     print("preparing...")
     scaler = StandardScaler()
-    df[['Goal', 'Days', 'Backers']] = scaler.fit_transform(df[['Goal', 'Days', 'Backers']])
+    df[['Goal', 'Days', 'Backers']] = scaler.fit_transform(
+        df[['Goal', 'Days', 'Backers']])
     dfx = df.drop(columns=['State'])
 
     from sklearn.decomposition import PCA
@@ -86,4 +90,3 @@ def test_model():
 if __name__ == '__main__':
     prepare_dataset()
     test_model()
-
