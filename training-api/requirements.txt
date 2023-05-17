@@ -4,5 +4,6 @@ pyhumps
 uvicorn
 pydantic
 redis
+requests
 sqlalchemy
 sqlalchemy-utils

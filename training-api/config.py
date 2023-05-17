@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Constants
 DATABASE_URL = "sqlite:///./trainings.db"
 REDIS_URL = os.environ['REDIS_URL']
+DATASET_API_URL = os.environ['DATASET_API_URL']
 
 
 # Logging

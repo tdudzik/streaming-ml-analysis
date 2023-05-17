@@ -1,7 +1,0 @@
-databases
-fastapi
-pyhumps
-uvicorn
-pydantic
-sqlalchemy
-sqlalchemy-utils

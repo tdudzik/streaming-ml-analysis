@@ -9,3 +9,8 @@ class TrainingResponse(BaseApi):
     training_id: str
     dataset_id: str
     status: str
+    metrics: dict | None
+
+
+class TrainingCompleteRequest(BaseApi):
+    metrics: dict

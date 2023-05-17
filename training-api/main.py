@@ -1,7 +1,8 @@
 import json
+import requests
 import uuid
-from api import TrainingRequest, TrainingResponse
-from config import app, get_db, init_db, redis
+from api import TrainingCompleteRequest, TrainingRequest, TrainingResponse
+from config import app, get_db, init_db, redis, DATASET_API_URL
 from model import Training
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -28,18 +29,26 @@ def create_training(training_request: TrainingRequest, db: Session = Depends(get
         raise HTTPException(
             status_code=400, detail="A training is currently in progress")
 
+    # Get dataset
+    dataset_response = requests.get(__dataset_api_url(
+        f'/datasets/{training_request.dataset_id}'))
+    if dataset_response.status_code != 200:
+        raise HTTPException(status_code=400, detail="Dataset not found")
+    dataset = dataset_response.json()
+
     # Change training state to 'in progress'
     redis.set(TRAINING_STATE_KEY, Training.STATUS_IN_PROGRESS)
 
     # Create a new training
     training = Training(
-        training_id=str(uuid.uuid4()), dataset_id=training_request.dataset_id, status=Training.STATUS_QUEUED)
+        training_id=str(uuid.uuid4()), dataset_id=dataset['datasetId'], status=Training.STATUS_QUEUED, metrics=None)
 
     # Save training to a db and publish it
     db.add(training)
     db.commit()
     db.refresh(training)
-    redis.publish('trainings', json.dumps(training.to_json()))
+    redis.publish('trainings', json.dumps(
+        {'trainingId': training.training_id, 'datasetUri': dataset['uri']}))
 
     return training.to_api_response()
 
@@ -50,8 +59,8 @@ def get_training(training_id: str, db: Session = Depends(get_db)):
 
 
 @app.post('/trainings/{training_id}/complete', response_model=TrainingResponse)
-def complete_training(training_id: str, db: Session = Depends(get_db)):
-    return __update_training(db, training_id, lambda training: training.complete())
+def complete_training(training_id: str, complete_request: TrainingCompleteRequest, db: Session = Depends(get_db)):
+    return __update_training(db, training_id, lambda training: training.complete(complete_request.metrics))
 
 
 @app.post('/trainings/{training_id}/fail', response_model=TrainingResponse)
@@ -73,3 +82,7 @@ def __update_training(db: Session, training_id: str, update: Callable[[Training]
     db.commit()
     db.refresh(training)
     return training.to_api_response()
+
+
+def __dataset_api_url(path) -> str:
+    return DATASET_API_URL + path

@@ -25,21 +25,12 @@ def training_api_url(path) -> str:
     return config.TRAINING_API_URL + path
 
 
-def metrics_api_url(path) -> str:
-    return config.METRICS_API_URL + path
-
-
 def run_training(training_data):
     try:
         training_id = training_data['trainingId']
         metrics = training.run(training_data)
-        metrics_request = {
-            'training_id': training_id,
-            'metrics': metrics
-        }
         requests.post(training_api_url(
-            '/trainings/' + training_id + '/complete'))
-        requests.post(metrics_api_url('/metrics'), json=metrics_request)
+            '/trainings/' + training_id + '/complete'), json={'metrics': metrics})
     except Exception as e:
         logger.error('An error occurred: %s', str(e))
         requests.post(training_api_url(
