@@ -69,6 +69,21 @@ export default function Trainings() {
             .catch(error => console.error('Error:', error));
     };
 
+    const onScheduleCancel = () => {
+        fetch('http://localhost:8083/trainings/schedule', {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) { throw response }
+                return response.json();
+            })
+            .then(data => {
+                setSchedule(null);
+                console.log("Schedule cancelled successfully");
+            })
+            .catch(error => console.error('Error:', error));
+    };
+
     useEffect(() => {
         fetch('http://localhost:8082/datasets')
             .then(response => response.json())
@@ -168,6 +183,9 @@ export default function Trainings() {
                                     Current time: {currentTime}
                                 </Typography>
                             </CardContent>
+                            <CardActions>
+                                <Button size="small" onClick={onScheduleCancel}>Cancel</Button>
+                            </CardActions>
                         </Card>
                     ) : (
                         <Alert severity="info">No training schedule found.</Alert>

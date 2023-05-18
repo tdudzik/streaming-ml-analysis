@@ -60,6 +60,7 @@ def create_training(training_request: TrainingRequest, db: Session = Depends(get
 @app.post('/trainings/schedule', response_model=TrainingScheduleResponse)
 def schedule_training(schedule_training_request: ScheduleTrainingRequest):
     scheduler.remove_all_jobs()
+    redis.delete(TRAINING_SCHEDULE_KEY)
     if schedule_training_request.interval_unit == TrainingIntervalUnit.MINUTES:
         scheduler.add_job(__create_training, 'interval',
                           minutes=schedule_training_request.interval)
@@ -81,6 +82,12 @@ def schedule_training(schedule_training_request: ScheduleTrainingRequest):
     redis.set(TRAINING_SCHEDULE_KEY, training_schedule_response.json())
 
     return training_schedule_response
+
+
+@app.delete('/trainings/schedule')
+def cancel_training_schedule():
+    scheduler.remove_all_jobs()
+    redis.delete(TRAINING_SCHEDULE_KEY)
 
 
 @app.get('/trainings/schedule', response_model=TrainingScheduleResponse)
