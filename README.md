@@ -24,7 +24,11 @@ Zbiór danych ma rozmiar 49,2 MB, jest w formacie `.csv`, składa się z 374853 
 
 Źródło: [https://www.kaggle.com/datasets/ulrikthygepedersen/kickstarter-projects](https://www.kaggle.com/datasets/ulrikthygepedersen/kickstarter-projects)
 
-## Folder "preparation"
+## Architektura aplikacji
+
+![Architecture](./docs/architecture.png)
+
+<!-- ## Folder "preparation"
 
 Skrypt "prepare_dataset.py" przygotowuje zbiór kickstarter_projects.csv poprzez usunięcie niepotrzebnych kolumn, koduje zmienne jakościowe do postaci binanej. Także służy do testowania modeli.
 
@@ -32,4 +36,4 @@ Skrypt "prepare_dataset.py" przygotowuje zbiór kickstarter_projects.csv poprzez
 
 - LogisticRegression: 0.69
 - MLP (PCA = 100, hidden layers = 10, 5): 0.70
-- LogisticRegression (zbiór wraz z kolumną "Backers"): 0.87
+- LogisticRegression (zbiór wraz z kolumną "Backers"): 0.87 -->
