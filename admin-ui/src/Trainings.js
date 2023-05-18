@@ -96,6 +96,23 @@ export default function Trainings() {
             });
     }, []);
 
+    const [currentTime, setCurrentTime] = useState(getFormattedTime());
+
+    function getFormattedTime() {
+        const now = new Date();
+        return now.toISOString().substring(0, 19).replace('T', ' ');
+    };
+
+    useEffect(() => {
+        const timerID = setInterval(() => {
+            setCurrentTime(getFormattedTime());
+        }, 1000);
+
+        return function cleanup() {
+            clearInterval(timerID);
+        };
+    }, []);;
+
     const renderMetricsTable = (metrics) => {
         const keys = Object.keys(metrics);
         return (
@@ -146,6 +163,9 @@ export default function Trainings() {
                                 </Typography>
                                 <Typography color="text.secondary">
                                     Created at: {schedule.createdAt}
+                                </Typography>
+                                <Typography color="text.secondary">
+                                    Current time: {currentTime}
                                 </Typography>
                             </CardContent>
                         </Card>
@@ -265,6 +285,7 @@ export default function Trainings() {
                                     <TableCell>Dataset name</TableCell>
                                     <TableCell>Status</TableCell>
                                     <TableCell>Created at</TableCell>
+                                    <TableCell>Completed at</TableCell>
                                     <TableCell>Metrics</TableCell> {/* Keep this column */}
                                 </TableRow>
                             </TableHead>
@@ -275,6 +296,7 @@ export default function Trainings() {
                                         <TableCell>{training.datasetName}</TableCell>
                                         <TableCell>{training.status}</TableCell>
                                         <TableCell>{training.createdAt}</TableCell>
+                                        <TableCell>{(training.completedAt && training.completedAt) || "-"}</TableCell>
                                         <TableCell>
                                             <Button
                                                 size="small"

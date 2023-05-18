@@ -1,5 +1,6 @@
 import api
 import json
+import time
 from config import BaseDb
 from datetime import datetime
 from sqlalchemy import BigInteger, Column, String
@@ -16,6 +17,7 @@ class Training(BaseDb):
     metrics = Column(String)
     created_at = Column(BigInteger, server_default=text(
         f"(CAST(strftime('%s', 'now') AS INT))"))
+    completed_at = Column(BigInteger)
 
     STATUS_QUEUED = 'QUEUED'
     STATUS_IN_PROGRESS = 'IN_PROGRESS'
@@ -29,6 +31,7 @@ class Training(BaseDb):
             'datasetName': self.dataset_name,
             'status': self.status,
             'createdAt': self.created_at,
+            'completedAt': self.completed_at,
             'metrics': {} if self.metrics is None else self.metrics
         }
 
@@ -40,6 +43,8 @@ class Training(BaseDb):
             status=self.status,
             created_at=datetime.fromtimestamp(
                 self.created_at).strftime("%Y-%m-%d %H:%M:%S"),
+            completed_at=None if self.completed_at is None else datetime.fromtimestamp(
+                self.completed_at).strftime("%Y-%m-%d %H:%M:%S"),
             metrics=None if self.metrics is None else json.loads(self.metrics)
         )
 
@@ -49,6 +54,7 @@ class Training(BaseDb):
     def complete(self, metrics: dict) -> None:
         self.status = Training.STATUS_COMPLETED
         self.metrics = json.dumps(metrics)
+        self.completed_at = int(time.time())
 
     def fail(self) -> None:
         self.status = Training.STATUS_FAILED
