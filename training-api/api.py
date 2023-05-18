@@ -12,6 +12,7 @@ class TrainingResponse(BaseApi):
     dataset_name: str
     status: str
     created_at: str
+    completed_at: str | None
     metrics: dict | None
 
 
