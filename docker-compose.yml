@@ -1,10 +1,15 @@
 version: '3.8'
 services:
+  admin-ui:
+    build: ./admin-ui
+    ports:
+      - "8081:80"
   dataset-api:
     build: ./dataset-api
     ports:
-      - "8081:80"
+      - "8082:80"
     volumes:
+      - ./dataset-api/datasets.db:/app/datasets.db
       - data_volume:/app/data
   redis:
     image: redis:latest
@@ -13,12 +18,15 @@ services:
   training-api:
     build: ./training-api
     ports:
-      - "8082:80"
+      - "8083:80"
     depends_on:
       - redis
     environment:
       - REDIS_URL=redis://redis:6379
       - DATASET_API_URL=http://dataset-api:80
+      - TRAINING_API_URL=http://training-api:80
+    volumes:
+      - ./training-api/trainings.db:/app/trainings.db
   training-worker:
     build: ./training-worker
     depends_on:

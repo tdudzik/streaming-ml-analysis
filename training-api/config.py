@@ -1,6 +1,8 @@
 import logging
 import os
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from humps import camelize
 from pydantic import BaseModel
 from redis import Redis
@@ -11,6 +13,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 DATABASE_URL = "sqlite:///./trainings.db"
 REDIS_URL = os.environ['REDIS_URL']
 DATASET_API_URL = os.environ['DATASET_API_URL']
+TRAINING_API_URL = os.environ['TRAINING_API_URL']
 
 
 # Logging
@@ -53,7 +56,22 @@ class BaseApi(BaseModel):
 
 # App
 app = FastAPI()
+origins = [
+    "http://localhost:8081"
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Redis
 redis = Redis.from_url(REDIS_URL, decode_responses=True)
+
+
+# Scheduler
+scheduler = BackgroundScheduler()
+scheduler.start()

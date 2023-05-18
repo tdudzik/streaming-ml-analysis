@@ -28,6 +28,8 @@ def training_api_url(path) -> str:
 def run_training(training_data):
     try:
         training_id = training_data['trainingId']
+        requests.post(training_api_url(
+            '/trainings/' + training_id + '/in-progress'))
         metrics = training.run(training_data)
         requests.post(training_api_url(
             '/trainings/' + training_id + '/complete'), json={'metrics': metrics})
