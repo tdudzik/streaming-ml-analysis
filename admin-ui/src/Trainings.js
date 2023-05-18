@@ -293,7 +293,7 @@ export default function Trainings() {
                     </Box>
 
                     <Dialog open={openMetrics} onClose={handleMetricsClose} aria-labelledby="metrics-dialog-title">
-                        <DialogTitle id="metrics-dialog-title">Training Metrics</DialogTitle>
+                        <DialogTitle id="metrics-dialog-title">Metrics</DialogTitle>
                         <DialogContent>
                             {metrics ? renderMetricsTable(metrics) : "No metrics available"}
                         </DialogContent>
