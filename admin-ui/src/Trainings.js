@@ -102,7 +102,7 @@ export default function Trainings() {
         fetch('http://localhost:8083/trainings/schedule')
             .then(response => {
                 if (!response.ok) { throw response }
-                return response.json();  //we only proceed to the next .then if the status was ok.
+                return response.json();
             })
             .then(data => setSchedule(data))
             .catch(error => {

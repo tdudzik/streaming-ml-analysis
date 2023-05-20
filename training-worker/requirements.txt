@@ -1,2 +1,6 @@
 redis
 requests
+dask[complete]
+dask-ml
+scikit-learn
+pandas

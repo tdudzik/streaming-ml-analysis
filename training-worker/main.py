@@ -30,7 +30,13 @@ def run_training(training_data):
         training_id = training_data['trainingId']
         requests.post(training_api_url(
             '/trainings/' + training_id + '/in-progress'))
-        metrics = training.run(training_data)
+        training_id = training_data['trainingId']
+        dataset_uri = training_data['datasetUri']
+        logging.info(
+            "Training started - trainingId: %s, datasetUri: %s", training_id, dataset_uri)
+        metrics = training.run(dataset_uri)
+        logging.info(
+            "Training finished - trainingId: %s, datasetUri: %s, metrics: %s", training_id, dataset_uri, json.dumps(metrics))
         requests.post(training_api_url(
             '/trainings/' + training_id + '/complete'), json={'metrics': metrics})
     except Exception as e:
