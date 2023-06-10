@@ -3,7 +3,7 @@ import json
 import time
 from config import BaseDb
 from datetime import datetime
-from sqlalchemy import BigInteger, Column, String
+from sqlalchemy import BigInteger, Boolean, Column, String
 from sqlalchemy.sql import text
 
 
@@ -15,6 +15,7 @@ class Training(BaseDb):
     dataset_name = Column(String)
     status = Column(String)
     metrics = Column(String)
+    selected = Column(Boolean, default=False)
     created_at = Column(BigInteger, server_default=text(
         f"(CAST(strftime('%s', 'now') AS INT))"))
     completed_at = Column(BigInteger)
@@ -32,7 +33,8 @@ class Training(BaseDb):
             'status': self.status,
             'createdAt': self.created_at,
             'completedAt': self.completed_at,
-            'metrics': {} if self.metrics is None else self.metrics
+            'metrics': {} if self.metrics is None else self.metrics,
+            'selected': self.selected
         }
 
     def to_api_response(self) -> api.TrainingResponse:
@@ -41,11 +43,12 @@ class Training(BaseDb):
             dataset_id=self.dataset_id,
             dataset_name=self.dataset_name,
             status=self.status,
-            created_at=datetime.fromtimestamp(
-                self.created_at).strftime("%Y-%m-%d %H:%M:%S"),
-            completed_at=None if self.completed_at is None else datetime.fromtimestamp(
-                self.completed_at).strftime("%Y-%m-%d %H:%M:%S"),
-            metrics=None if self.metrics is None else json.loads(self.metrics)
+            created_at=datetime.utcfromtimestamp(
+                self.created_at).isoformat() + 'Z',
+            completed_at=None if self.completed_at is None else datetime.utcfromtimestamp(
+                self.completed_at).isoformat() + 'Z',
+            metrics=None if self.metrics is None else json.loads(self.metrics),
+            selected=self.selected
         )
 
     def in_progress(self) -> None:

@@ -14,6 +14,7 @@ class TrainingResponse(BaseApi):
     created_at: str
     completed_at: str | None
     metrics: dict | None
+    selected: bool
 
 
 class TrainingCompleteRequest(BaseApi):

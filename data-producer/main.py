@@ -25,11 +25,10 @@ if __name__ == '__main__':
     while True:
         timestamp = round(time.time() * 1000)
         single_data = random.choice(kickstarter_data)
-        data = {'timestamp': timestamp,
-                'data': single_data}
+        data = {'data': single_data}
         message = json.dumps(data)
         producer.send(topic, message.encode('utf-8'))
         producer.flush()
         logger.info("message sent: %s", message)
-        time.sleep(1)
+        time.sleep(5)
     producer.close()

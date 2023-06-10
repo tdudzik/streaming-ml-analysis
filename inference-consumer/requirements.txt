@@ -1,2 +1,6 @@
+dask[complete]
+dask-ml
+joblib
 kafka-python
 numpy
+requests

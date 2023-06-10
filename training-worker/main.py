@@ -1,16 +1,10 @@
 import config
-import logging
 import json
 import os
 import requests
 import training
+from config import logger
 from redis import Redis
-
-
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    handlers=[logging.StreamHandler()])
-logger = logging.getLogger(__name__)
 
 
 redis = Redis.from_url(os.environ['REDIS_URL'], decode_responses=True)
@@ -32,10 +26,10 @@ def run_training(training_data):
             '/trainings/' + training_id + '/in-progress'))
         training_id = training_data['trainingId']
         dataset_uri = training_data['datasetUri']
-        logging.info(
+        logger.info(
             "Training started - trainingId: %s, datasetUri: %s", training_id, dataset_uri)
-        metrics = training.run(dataset_uri)
-        logging.info(
+        metrics = training.run(training_id, dataset_uri)
+        logger.info(
             "Training finished - trainingId: %s, datasetUri: %s, metrics: %s", training_id, dataset_uri, json.dumps(metrics))
         requests.post(training_api_url(
             '/trainings/' + training_id + '/complete'), json={'metrics': metrics})
@@ -47,9 +41,9 @@ def run_training(training_data):
 
 
 if __name__ == '__main__':
-    logging.info("Training worker started")
+    logger.info("Training worker started")
     for message in pubsub.listen():
         if message['type'] == 'message':
             training_data = json.loads(message['data'])
             run_training(training_data)
-    logging.info("Training worker stopped")
+    logger.info("Training worker stopped")

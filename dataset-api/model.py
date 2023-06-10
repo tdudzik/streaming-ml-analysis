@@ -19,6 +19,6 @@ class Dataset(BaseDb):
             dataset_id=self.dataset_id,
             name=self.name,
             uri=self.uri,
-            created_at=datetime.fromtimestamp(
-                self.created_at).strftime("%Y-%m-%d %H:%M:%S")
+            created_at=datetime.utcfromtimestamp(
+                self.created_at).isoformat() + 'Z'
         )

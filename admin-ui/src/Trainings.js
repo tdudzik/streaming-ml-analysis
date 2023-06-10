@@ -17,6 +17,8 @@ export default function Trainings() {
     const [selectedDatasetId, setSelectedDatasetId] = useState('');
     const [schedule, setSchedule] = useState(null);
     const [openSchedule, setOpenSchedule] = useState(false);
+    const [completedModels, setCompletedModels] = useState([]);
+    const [selectedModel, setSelectedModel] = useState('');
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -126,7 +128,43 @@ export default function Trainings() {
         return function cleanup() {
             clearInterval(timerID);
         };
-    }, []);;
+    }, []);
+
+    const fetchCompletedModels = () => {
+        fetch('http://localhost:8083/trainings?status=COMPLETED')
+            .then(response => response.json())
+            .then(data => setCompletedModels(data))
+            .catch(error => console.error('Error:', error));
+    }
+
+    useEffect(() => {
+        fetch('http://localhost:8083/trainings?status=COMPLETED')
+            .then(response => response.json())
+            .then(data => {
+                setCompletedModels(data);
+                const selectedModel = data.find(model => model.selected === true);
+                if (selectedModel) setSelectedModel(selectedModel.trainingId);
+            })
+            .catch(error => console.error('Error:', error));
+    }, []);
+
+    const handleModelSelect = (event) => {
+        setSelectedModel(event.target.value);
+    }
+
+    const submitSelectedModel = () => {
+        fetch(`http://localhost:8083/trainings/${selectedModel}/select`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(() => fetchCompletedModels())  // Refresh the list of completed models
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Fetch the models on component mount
+    useEffect(() => {
+        fetchCompletedModels();
+    }, []);
 
     const renderMetricsTable = (metrics) => {
         const keys = Object.keys(metrics);
@@ -166,6 +204,35 @@ export default function Trainings() {
         <React.Fragment>
             <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+                    <Title>Select Model</Title>
+                    <Box sx={{ mt: 2 }}>
+                        <FormControl fullWidth>
+                            <InputLabel id="model-select-label">Model</InputLabel>
+                            <Select
+                                labelId="model-select-label"
+                                id="model-select"
+                                value={selectedModel}
+                                label="Model"
+                                onChange={handleModelSelect}
+                            >
+                                {completedModels.map((model) => (
+                                    <MenuItem key={model.trainingID} value={model.trainingId}>
+                                        {model.trainingId} - {model.datasetName}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                            <Button variant="outlined" color="primary" onClick={submitSelectedModel} size="small">
+                                Select
+                            </Button>
+                        </Box>
+                    </Box>
+                </Paper>
+            </Grid>
+
+            <Grid item xs={12}>
+                <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
                     <Title>Training Schedule</Title>
                     {schedule ? (
                         <Card sx={{ mt: 3 }}>
@@ -177,7 +244,7 @@ export default function Trainings() {
                                     Every {schedule.interval} {schedule.intervalUnit}
                                 </Typography>
                                 <Typography color="text.secondary">
-                                    Created at: {schedule.createdAt}
+                                    Created at: {new Date(schedule.createdAt).toLocaleString()}
                                 </Typography>
                                 <Typography color="text.secondary">
                                     Current time: {currentTime}
@@ -299,7 +366,7 @@ export default function Trainings() {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Dataset ID</TableCell>
+                                    <TableCell>Training ID</TableCell>
                                     <TableCell>Dataset name</TableCell>
                                     <TableCell>Status</TableCell>
                                     <TableCell>Created at</TableCell>
@@ -310,11 +377,11 @@ export default function Trainings() {
                             <TableBody>
                                 {trainings.map((training) => (
                                     <TableRow key={training.trainingId}>
-                                        <TableCell>{training.datasetId}</TableCell>
+                                        <TableCell>{training.trainingId}</TableCell>
                                         <TableCell>{training.datasetName}</TableCell>
                                         <TableCell>{training.status}</TableCell>
-                                        <TableCell>{training.createdAt}</TableCell>
-                                        <TableCell>{(training.completedAt && training.completedAt) || "-"}</TableCell>
+                                        <TableCell>{new Date(training.createdAt).toLocaleString()}</TableCell>
+                                        <TableCell>{(training.completedAt && new Date(training.completedAt).toLocaleString()) || "-"}</TableCell>
                                         <TableCell>
                                             <Button
                                                 size="small"

@@ -5,6 +5,7 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
+import BarChartIcon from '@mui/icons-material/BarChart'; // import this for Inferences icon
 import MyLink from './MyLink';
 
 export const mainListItems = (
@@ -31,6 +32,14 @@ export const mainListItems = (
                     <ModelTrainingIcon />
                 </ListItemIcon>
                 <ListItemText primary="Trainings" />
+            </ListItemButton>
+        </MyLink>
+        <MyLink to="/inferences">
+            <ListItemButton>
+                <ListItemIcon>
+                    <BarChartIcon />
+                </ListItemIcon>
+                <ListItemText primary="Inferences" />
             </ListItemButton>
         </MyLink>
     </React.Fragment>

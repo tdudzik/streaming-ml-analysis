@@ -5,13 +5,16 @@ from dask_ml.model_selection import train_test_split
 from dask_ml.linear_model import LogisticRegression
 # from dask_ml.metrics import
 from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_absolute_error, mean_squared_error
+from config import logger
 import pickle
+
 
 def train_model():
     df = dd.read_csv("dataset.csv")
 
     scaler = StandardScaler()
-    df[['Goal', 'Days', 'Backers']] = scaler.fit_transform(df[['Goal', 'Days', 'Backers']])
+    df[['Goal', 'Days', 'Backers']] = scaler.fit_transform(
+        df[['Goal', 'Days', 'Backers']])
     scaler_filename = "scaler.dml"
     pickle.dump(scaler, open(scaler_filename, 'wb'))
     print("Saved scaler to: " + scaler_filename)
@@ -25,7 +28,6 @@ def train_model():
         X_test.to_dask_array(lengths=True), \
         y_train.to_dask_array(lengths=True), \
         y_test.to_dask_array(lengths=True)
-
 
     model = LogisticRegression(verbose=True)
     model.fit(X_train, y_train)

@@ -1,11 +1,9 @@
-apscheduler
 databases
 fastapi
-kafka-python
 pyhumps
 uvicorn
 pydantic
-redis
+python-dateutil
 requests
 sqlalchemy
 sqlalchemy-utils

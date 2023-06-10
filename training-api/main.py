@@ -3,17 +3,18 @@ import requests
 import time
 import uuid
 from api import ScheduleTrainingRequest, TrainingCompleteRequest, TrainingIntervalUnit, TrainingRequest, TrainingResponse, TrainingScheduleResponse
-from config import app, get_db, init_db, redis, scheduler, DATASET_API_URL, TRAINING_API_URL
+from config import app, get_db, init_db, init_kafka, redis, scheduler, DATASET_API_URL, TRAINING_API_URL
 from datetime import datetime
 from model import Training
 from fastapi import Depends, HTTPException
 from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
-from typing import Callable
+from typing import Callable, Optional
 
 
 init_db()
+kafka_producer = init_kafka()
 
 
 TRAINING_STATE_KEY = 'training_state'
@@ -21,8 +22,11 @@ TRAINING_SCHEDULE_KEY = 'training_schedule'
 
 
 @app.get('/trainings', response_model=list[TrainingResponse])
-def get_all_trainings(db: Session = Depends(get_db)):
-    return [training.to_api_response() for training in db.query(Training).order_by(asc(Training.created_at)).all()]
+def get_all_trainings(status: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(Training).order_by(asc(Training.created_at))
+    if status:
+        query = query.filter(Training.status == status)
+    return [training.to_api_response() for training in query.all()]
 
 
 @app.post('/trainings', response_model=TrainingResponse)
@@ -123,6 +127,29 @@ def complete_training(training_id: str, complete_request: TrainingCompleteReques
 @app.post('/trainings/{training_id}/fail', response_model=TrainingResponse)
 def fail_training(training_id: str, db: Session = Depends(get_db)):
     return __update_training(db, training_id, lambda training: training.fail())
+
+
+@app.post('/trainings/{training_id}/select', response_model=TrainingResponse)
+def select_training(training_id: str, db: Session = Depends(get_db)):
+    training = db.query(Training).get(training_id)
+
+    if not training:
+        raise HTTPException(status_code=404, detail="Training not found")
+
+    # Unselect all trainings
+    db.query(Training).update({Training.selected: False})
+
+    # Select the specified training
+    training.selected = True
+
+    # Commit the changes to the database
+    db.commit()
+    db.refresh(training)
+
+    model_selection_msg = json.dumps({'trainingId': training_id})
+    kafka_producer.send('model-selection', model_selection_msg.encode('utf-8'))
+
+    return training.to_api_response()
 
 
 def __get_training(db: Session, training_id: str) -> Training:

@@ -1,6 +1,7 @@
 import Dashboard from './Dashboard';
 import Datasets from './Datasets';
 import Trainings from './Trainings';
+import Inferences from './Inferences';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import * as React from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
@@ -146,6 +147,7 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/datasets" element={<Datasets />} />
                   <Route path="/trainings" element={<Trainings />} />
+                  <Route path="/inferences" element={<Inferences />} />
                 </Routes>
               </Grid>
             </Container>

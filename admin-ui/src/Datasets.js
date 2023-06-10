@@ -134,7 +134,7 @@ export default function Datasets() {
                                     <TableCell>{dataset.datasetId}</TableCell>
                                     <TableCell>{dataset.name}</TableCell>
                                     <TableCell>{dataset.uri}</TableCell>
-                                    <TableCell>{dataset.createdAt}</TableCell>
+                                    <TableCell>{new Date(dataset.createdAt).toLocaleString()}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

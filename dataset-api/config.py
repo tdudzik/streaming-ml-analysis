@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Constants
-DATABASE_URL = "sqlite:///./datasets.db"
+DATABASE_URL = "sqlite:///./dataset.db"
 
 
 # Logging

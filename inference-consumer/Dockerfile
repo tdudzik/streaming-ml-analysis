@@ -9,6 +9,8 @@ RUN pip install -r requirements.txt
 
 COPY main.py .
 COPY logger.py .
+COPY inference.py .
+COPY config.py .
 
 COPY wait-for-kafka.sh . 
 RUN chmod +x wait-for-kafka.sh

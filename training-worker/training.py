@@ -1,5 +1,8 @@
 import dask.dataframe as dd
+import joblib
 import pandas as pd
+import json
+from config import logger
 from dask.distributed import Client
 from dask_ml.preprocessing import StandardScaler
 from dask_ml.model_selection import train_test_split
@@ -7,7 +10,7 @@ from dask_ml.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, accuracy_score, log_loss, mean_absolute_error, mean_squared_error
 
 
-def prepare_dataset(dataset_path: str) -> None:
+def prepare_dataset(dataset_path: str) -> tuple[pd.DataFrame, list[str]]:
     # Read the dataset from a CSV file
     df = pd.read_csv(dataset_path)
 
@@ -33,6 +36,8 @@ def prepare_dataset(dataset_path: str) -> None:
     # Perform one-hot encoding on the 'Category' column
     cats = pd.get_dummies(df.Category, prefix='Category')
 
+    model_categories = [col for col in cats.columns]
+
     # Convert boolean values to 1s and 0s
     for cat in cats.columns:
         cats[cat] = cats[cat].map(lambda x: 1 if x == True else 0)
@@ -42,10 +47,10 @@ def prepare_dataset(dataset_path: str) -> None:
 
     # Join the original dataframe with the one-hot encoded categories dataframe
     df = df.join(cats)
-    return df
+    return df, model_categories
 
 
-def train_model(df: dd.DataFrame) -> dict:
+def train_model(df: dd.DataFrame) -> tuple[LogisticRegression, StandardScaler, dict]:
     # Initialize a scaler and scale numeric columns
     scaler = StandardScaler()
     df[['Goal', 'Days', 'Backers']] = scaler.fit_transform(
@@ -84,13 +89,24 @@ def train_model(df: dd.DataFrame) -> dict:
         "rmse": mean_squared_error(y_test, predicted, squared=False)
     }
 
-    return metrics
+    return model, scaler, metrics
 
 
-def run(dataset_uri: str) -> dict:
-    prepared_df = prepare_dataset(dataset_uri)
+def run(training_id: str, dataset_uri: str) -> dict:
+    prepared_df, model_categories = prepare_dataset(dataset_uri)
+    print("example: " +
+          str(json.loads(prepared_df.to_json(orient='records'))[0]))
     client = Client()
     df = dd.from_pandas(prepared_df, npartitions=2)
-    metrics = train_model(df)
+    model, scaler, metrics = train_model(df)
+    joblib.dump(model, f'./model/{training_id}.joblib')
+    joblib.dump(scaler, f'./model/{training_id}.scaler.joblib')
+    with open(f'./model/{training_id}.categories.json', 'w') as f:
+        json.dump(model_categories, f)
     client.shutdown()
     return metrics
+
+
+if __name__ == '__main__':
+    metrics = run('test', '../datasets/kickstarter_100.csv')
+    logger.info('metrics: ' + str(metrics))
